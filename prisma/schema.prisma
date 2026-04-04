@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  mobile       String   @unique
+  email        String?
+  fullName     String
+  companyName  String?
+  passwordHash String
+  gstNumber    String?
+  address      String?
+  
+  orders       Order[]
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  name         String   
+  category     String   @default("Modular Boxes")
+  moduleSize   String   
+  material     String   
+  primaryUse   String   
+  dimensions   String   
+  mrp          Float    
+  price        Float    
+  
+  thickness    String   
+  coating      String   
+  features     String   
+  hsnCode      String   @default("8538")
+  description  String   
+  imageUrl     String?  // the new image upload URL path
+  imageGallery String?  // JSON stringified array of multiple image URLs
+  
+  inStock      Boolean  @default(true)
+  showInBanner Boolean  @default(false)
+  bulkDiscount Float    @default(5.0) 
+  
+  orderItems   OrderItem[]
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Order {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+  totalAmount  Float
+  status       String   @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED
+  
+  paymentMode  String   @default("BANK_TRANSFER") // BANK_TRANSFER or UPI
+  
+  items        OrderItem[]
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model OrderItem {
+  id           Int      @id @default(autoincrement())
+  orderId      Int
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    Int
+  product      Product  @relation(fields: [productId], references: [id])
+  productName  String
+  quantity     Int
+  price        Float
+}
+
+model StoreSettings {
+  id           Int      @id @default(1)
+  businessName String   @default("Shubham Enterprise")
+  brandName    String   @default("SHUBOX")
+  gstin        String   @default("19EAOPP6239Q1ZH")
+  address      String   @default("41, Tangra Road, Kolkata - 700 015")
+  phoneOne     String   @default("+91 9830234950")
+  phoneTwo     String   @default("+91 6290754634")
+  email        String   @default("siyarampanjiyara@gmail.com")
+  
+  bankName     String   @default("Bandhan Bank")
+  bankBranch   String   @default("C I T Road")
+  accountNo    String   @default("10220004937961")
+  ifscCode     String   @default("BDBL0001843")
+}
+
+model ServiceablePincode {
+  code         String   @id
+  city         String
+  state        String   // e.g. "West Bengal" or "Other"
+  
+  createdAt    DateTime @default(now())
+}
