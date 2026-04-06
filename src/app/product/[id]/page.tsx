@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { Package, ShieldCheck, CheckCircle2, ChevronRight, HardHat, FileText, Settings, AlertTriangle } from "lucide-react";
+import { Package, ShieldCheck, CheckCircle2, ChevronRight, HardHat, FileText, Settings, AlertTriangle, Star } from "lucide-react";
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
 import { DeliveryChecker } from "@/components/DeliveryChecker";
@@ -121,15 +121,23 @@ export default async function ProductDetail({ params }: { params: Promise<{ id: 
                <div className="flex items-center gap-4 mb-8 pb-8 border-b border-slate-200">
                  <div className="flex flex-col">
                    <span className="text-slate-400 font-medium line-through text-lg">MRP: ₹{product.mrp.toFixed(2)}</span>
-                   <div className="text-4xl font-black text-slate-900 tracking-tight">
-                     ₹{product.price.toFixed(2)} <span className="text-base font-normal text-slate-500 tracking-normal">/ unit</span>
-                   </div>
-                   {product.inStock && (
-                     <div className="text-xs uppercase font-bold text-green-700 tracking-widest mt-2 bg-green-50 px-2 py-1 inline-block rounded border border-green-200 self-start">
-                        Bulk Tier: {product.bulkDiscount}% off at 100+ units
-                     </div>
-                   )}
-                 </div>
+                    <div className="text-4xl font-black text-slate-900 tracking-tight">
+                      ₹{product.price.toFixed(2)} <span className="text-base font-normal text-slate-500 tracking-normal">/ unit</span>
+                    </div>
+                    <div className="flex items-center gap-3 mt-2 flex-wrap">
+                      {product.inStock && (
+                        <div className="text-xs uppercase font-bold text-green-700 tracking-widest bg-green-50 px-2 py-1 inline-block rounded border border-green-200">
+                           Bulk Tier: {product.bulkDiscount}% off at 100+ units
+                        </div>
+                      )}
+                      {product.reviews.length > 0 && (
+                        <Link href="#reviews" className="flex items-center gap-1.5 text-xs font-black text-accent-orange uppercase tracking-widest bg-orange-50 px-2 py-1 rounded border border-orange-200 hover:bg-orange-100 transition-colors">
+                          <Star className="w-3 h-3 fill-current" />
+                          {(product.reviews.reduce((a:number, r:any)=>a+r.rating, 0)/product.reviews.length).toFixed(1)} ({product.reviews.length} Certification{product.reviews.length > 1 && 's'})
+                        </Link>
+                      )}
+                    </div>
+                  </div>
                  <div className="bg-red-600 font-extrabold text-white px-6 py-2 rounded-lg shadow-xl uppercase tracking-widest text-2xl ml-auto self-start border border-red-500 shadow-red-500/30">
                    {discountPercent}% OFF LIVE DEAL
                  </div>
@@ -208,11 +216,13 @@ export default async function ProductDetail({ params }: { params: Promise<{ id: 
         </div>
         
         {/* Reviews Section */}
-        <ProductReviewManager 
-           productId={product.id} 
-           initialReviews={product.reviews} 
-           sessionUser={session} 
-        />
+        <div id="reviews">
+          <ProductReviewManager 
+             productId={product.id} 
+             initialReviews={product.reviews} 
+             sessionUser={session} 
+          />
+        </div>
       </div>
     </div>
   );

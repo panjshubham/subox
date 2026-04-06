@@ -19,10 +19,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       include: { user: true, items: true }
     });
 
-    // Trigger email capability
-    if (status === 'SHIPPED' && updatedOrder.user?.email) {
-       const { sendShippingUpdateEmail } = await import('@/lib/email');
-       sendShippingUpdateEmail(updatedOrder, updatedOrder.user).catch(e => console.error("Shipping email error", e));
+    // Trigger email capability 
+    if (updatedOrder.user?.email) {
+       const { sendShippingUpdateEmail, sendDeliveryUpdateEmail } = await import('@/lib/email');
+       if (status === 'SHIPPED') {
+          sendShippingUpdateEmail(updatedOrder, updatedOrder.user).catch(e => console.error("Shipping email error", e));
+       } else if (status === 'DELIVERED') {
+          sendDeliveryUpdateEmail(updatedOrder, updatedOrder.user).catch(e => console.error("Delivery email error", e));
+       }
     }
 
     return NextResponse.json(updatedOrder);

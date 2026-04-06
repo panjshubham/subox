@@ -23,6 +23,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
         description: json.description,
         inStock: json.inStock,
         bulkDiscount: Number(json.bulkDiscount),
+        imageUrl: json.imageUrl,
       }
     });
     return NextResponse.json(updated);

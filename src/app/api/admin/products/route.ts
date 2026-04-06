@@ -27,6 +27,7 @@ export async function POST(request: Request) {
         description: json.description,
         inStock: json.inStock,
         bulkDiscount: Number(json.bulkDiscount),
+        imageUrl: json.imageUrl,
       }
     });
     return NextResponse.json(product, { status: 201 });

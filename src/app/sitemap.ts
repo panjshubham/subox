@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://shubox.local'; // User should change this to their actual domain
+  const baseUrl = 'https://subox.vercel.app'; // Production URL
 
   const products = await prisma.product.findMany({ select: { id: true, updatedAt: true } });
 

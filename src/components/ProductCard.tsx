@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { Package, ShieldCheck, CheckCircle2, ShoppingCart, Star } from "lucide-react";
 import { useCart } from "./CartProvider";
 
@@ -56,11 +57,12 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.imageUrl ? (
             <>
                <div className={`absolute inset-0 bg-slate-200 animate-pulse z-0 ${!isImageLoading && 'hidden'}`} />
-               <img 
+               <Image 
                  src={product.imageUrl} 
                  alt={product.name} 
+                 fill
                  onLoad={() => setIsImageLoading(false)}
-                 className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 rounded mix-blend-multiply z-10 ${isImageLoading ? 'opacity-0' : 'opacity-100'}`} 
+                 className={`object-cover group-hover:scale-105 transition-all duration-500 rounded mix-blend-multiply z-10 ${isImageLoading ? 'opacity-0' : 'opacity-100'}`} 
                />
             </>
           ) : (

@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin/', '/api/', '/profile/'],
     },
-    sitemap: 'https://shubox.local/sitemap.xml',
+    sitemap: 'https://subox.vercel.app/sitemap.xml',
   };
 }

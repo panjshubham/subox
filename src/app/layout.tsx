@@ -23,6 +23,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Shop G.I. M.S. Modular Boxes | ShuBox Industrial",
   description: "Manufacturer of high-quality G.I. M.S. Modular Boxes. Order online with bulk pricing options.",
+  verification: {
+    google: "google-site-verification-placeholder-12345", // REPLACE WITH YOUR ACTUAL CODE
+  },
 };
 
 export default async function RootLayout({

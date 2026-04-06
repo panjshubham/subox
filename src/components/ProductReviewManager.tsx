@@ -78,25 +78,41 @@ export function ProductReviewManager({ productId, initialReviews, sessionUser }:
       )}
 
       {/* Reviews List */}
-      <div className="space-y-4">
+      <div className="space-y-6">
          {reviews.length === 0 ? (
-            <p className="text-slate-500 text-sm italic">Be the first to review this component.</p>
+            <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-12 text-center group hover:bg-white transition-all">
+               <Star className="w-12 h-12 text-slate-200 mx-auto mb-4 group-hover:text-accent-orange transition-colors" />
+               <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">No project feedback yet</p>
+               <p className="text-[10px] text-slate-400 mt-1 uppercase">Be the first to certify the quality of this enclosure</p>
+            </div>
          ) : (
             reviews.map((r: any) => (
-               <div key={r.id} className="bg-white p-6 rounded shadow-sm border border-slate-100 flex flex-col sm:flex-row gap-4">
-                  <div className="flex-shrink-0 flex flex-col items-center sm:items-start w-32 border-b sm:border-b-0 sm:border-r border-slate-100 pb-4 sm:pb-0 sm:pr-4">
-                     <UserCircle2 className="w-10 h-10 text-slate-300 mb-2" />
-                     <span className="font-bold text-xs uppercase tracking-wider text-slate-800 text-center sm:text-left">{r.user?.fullName || "Verified Buyer"}</span>
-                     <span className="text-[10px] uppercase text-slate-400 font-bold tracking-widest text-center sm:text-left truncate max-w-full">{r.user?.companyName || "Contractor"}</span>
+               <div key={r.id} className="bg-gradient-to-br from-white to-slate-50 p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow">
+                  <div className="flex-shrink-0 flex flex-row md:flex-col items-center md:items-start gap-4 md:w-40 border-b md:border-b-0 md:border-r border-slate-100 pb-4 md:pb-0 md:pr-4">
+                     <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-white font-black text-xl shadow-lg border border-slate-700 uppercase">
+                        {r.user?.fullName?.charAt(0) || "U"}
+                     </div>
+                     <div className="flex flex-col">
+                        <span className="font-black text-xs uppercase tracking-wider text-slate-800 leading-tight">
+                           {r.user?.fullName || "Verified Buyer"}
+                        </span>
+                        <span className="text-[10px] uppercase text-accent-orange font-black tracking-widest mt-1">
+                           {r.user?.companyName || "Certified Contractor"}
+                        </span>
+                     </div>
                   </div>
                   <div className="flex-1">
-                     <div className="flex items-center gap-1 mb-2">
+                     <div className="flex items-center gap-1 mb-3">
                         {[1,2,3,4,5].map((s) => (
                            <Star key={s} className={`w-4 h-4 ${s <= r.rating ? 'fill-accent-orange text-accent-orange' : 'text-slate-200'}`} />
                         ))}
-                        <span className="ml-2 text-xs text-slate-400 font-bold">{new Date(r.createdAt).toLocaleDateString()}</span>
+                        <span className="ml-3 text-xs text-slate-400 font-bold uppercase tracking-widest">
+                           {new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
                      </div>
-                     <p className="text-sm text-slate-600 leading-relaxed font-medium">"{r.comment}"</p>
+                     <p className="text-sm text-slate-700 leading-relaxed font-medium italic">
+                        "{r.comment}"
+                     </p>
                   </div>
                </div>
             ))
