@@ -23,8 +23,21 @@ export async function POST(request: Request) {
             price: item.price
           }))
         }
-      }
+      },
+      include: { user: true }
     });
+
+    const emailHtml = `
+      <div style="font-family: sans-serif; padding: 20px;">
+        <h2 style="color: #f97316;">Order Confirmed!</h2>
+        <p>Thank you for choosing ShuBox. Your order #INV-${order.id.toString().padStart(6,'0')} has been received and is currently PENDING.</p>
+        <p>Please check your dashboard for updates regarding tracking and bank transfer execution.</p>
+      </div>
+    `;
+    const { sendEmail } = await import('@/lib/email');
+    if (order.user?.email) {
+       await sendEmail(order.user.email, `Order #INV-${order.id.toString().padStart(6,'0')} Confirmed`, emailHtml);
+    }
 
     return NextResponse.json({ success: true, orderId: order.id });
   } catch (error) {

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useCart } from "@/components/CartProvider";
 import { Trash2, ShieldCheck, CreditCard, Building2, Package } from "lucide-react";
 import Link from "next/link";
+import { PressButton } from "@/components/PressButton";
+import { motion } from "framer-motion";
 
 export default function CartPage() {
   const { items, removeItem, totalItems, baseTotal, totalDiscount, cartTotal } = useCart();
@@ -19,17 +21,84 @@ export default function CartPage() {
   const sgst = cartTotal * 0.09;
   const grandTotal = cartTotal + cgst + sgst;
 
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleRazorpayCheckout = async () => {
+    if (!session) return alert('Please login to place an order.');
+    const isLoaded = await loadRazorpay();
+    if (!isLoaded) return alert('Razorpay SDK failed to load. Are you online?');
+
+    const res = await fetch('/api/payment/create-order', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ amount: grandTotal })
+    });
+    
+    if (!res.ok) return alert('Failed to initiate Razorpay order.');
+    const data = await res.json();
+
+    const options = {
+       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '', // We'll supply this
+       amount: Math.round(grandTotal * 100),
+       currency: "INR",
+       name: settings?.businessName || 'ShuBox Industrial',
+       description: 'Premium Industrial Boxes',
+       order_id: data.order_id,
+       handler: async function (response: any) {
+          // Verify with Backend
+          const verifyRes = await fetch('/api/payment/verify', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                items,
+                totalAmount: grandTotal
+             })
+          });
+          if (verifyRes.ok) {
+             const verifyData = await verifyRes.json();
+             window.location.href = `/order-success?orderId=${verifyData.orderId}`;
+          } else {
+             alert('Payment verification failed. Please contact support.');
+          }
+       },
+       prefill: {
+          name: session.fullName,
+          email: session.email || '',
+          contact: session.mobile || ''
+       },
+       theme: {
+          color: '#f97316' // accent-orange
+       }
+    };
+
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+  };
+
   if (items.length === 0) {
     return (
       <div className="max-w-4xl mx-auto py-20 px-4 text-center">
         <h2 className="text-3xl font-bold text-slate-800 mb-4">Your Cart is Empty</h2>
         <p className="text-slate-500 mb-8">Looks like you haven't added any premium boxes to your cart yet.</p>
-        <Link 
-          href="/"
-          className="bg-accent-orange text-white px-8 py-3 rounded-lg font-bold hover:bg-accent-orange-hover transition-colors inline-block tracking-wider uppercase text-sm"
-        >
-          Return to Catalog
-        </Link>
+        <motion.div whileTap={{ scale: 0.97 }} transition={{ duration: 0.1 }}>
+          <Link 
+            href="/"
+            className="bg-accent-orange text-white px-8 py-3 rounded-lg font-bold hover:bg-accent-orange-hover transition-colors inline-block tracking-wider uppercase text-sm text-center"
+          >
+            Return to Catalog
+          </Link>
+        </motion.div>
       </div>
     );
   }
@@ -144,7 +213,7 @@ export default function CartPage() {
                 </div>
               ) : null}
 
-              <button
+              <PressButton
                  onClick={async () => {
                     if (!session) return alert('Please login to place an order.');
                     const res = await fetch('/api/checkout', {
@@ -159,11 +228,11 @@ export default function CartPage() {
                        alert('Failed to generate order.');
                     }
                  }}
-                 className="w-full bg-slate-900 text-white font-black py-4 rounded flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors shadow hover:-translate-y-0.5 uppercase tracking-widest text-sm"
+                 className="w-full bg-slate-900 text-white font-black py-4 rounded flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors shadow uppercase tracking-widest text-sm"
               >
                 <Package className="w-5 h-5" />
                 Place Order via Bank Transfer
-              </button>
+              </PressButton>
               
               <div className="relative flex py-2 items-center">
                  <div className="flex-grow border-t border-slate-200"></div>
@@ -171,13 +240,13 @@ export default function CartPage() {
                  <div className="flex-grow border-t border-slate-200"></div>
               </div>
 
-              <button
-                 onClick={() => alert('Razorpay API integration will be here.')}
-                 className="w-full bg-accent-orange text-white font-black py-4 rounded flex items-center justify-center gap-2 hover:bg-accent-orange-hover transition-colors shadow hover:-translate-y-0.5 uppercase tracking-widest text-sm"
+              <PressButton
+                 onClick={handleRazorpayCheckout}
+                 className="w-full bg-accent-orange text-white font-black py-4 rounded flex items-center justify-center gap-2 hover:bg-accent-orange-hover transition-colors shadow uppercase tracking-widest text-sm"
               >
                 <CreditCard className="w-5 h-5" />
-                Secure Checkout (UPI)
-              </button>
+                Secure Checkout (UPI/Cards)
+              </PressButton>
               <p className="text-[10px] text-center text-slate-400 mt-4 flex items-center justify-center gap-1 font-bold tracking-widest uppercase">
                 <ShieldCheck className="w-3 h-3 text-green-500" />
                 256-Bit Encrypted Secure Transaction

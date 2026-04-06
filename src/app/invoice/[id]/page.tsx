@@ -1,8 +1,10 @@
+import { Printer, ShieldCheck, Download, ChevronLeft } from "lucide-react";
+import Link from "next/link";
+import { InvoiceActions } from "@/components/InvoiceActions";
+
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import Link from "next/link";
-import { Printer, ShieldCheck, Download, ChevronLeft } from "lucide-react";
 
 export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -37,22 +39,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   return (
     <div className="bg-slate-50 min-h-screen py-12 px-4 flex flex-col items-center print:bg-white print:py-0 print:px-0">
        
-       <div className="w-full max-w-[21cm] flex justify-between items-center mb-6 print:hidden">
-         <Link href="/profile" className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800 uppercase tracking-widest">
-            <ChevronLeft className="w-4 h-4" /> Back to Dashboard
-         </Link>
-         <div className="flex gap-4">
-             <Link href={waLink} target="_blank" className="bg-[#25D366] text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 uppercase tracking-widest hover:bg-[#1ebd5a] shadow-md shadow-green-500/20">
-               Send to Factory
-             </Link>
-             <button onClick={() => {}} className="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded text-sm font-bold flex items-center gap-2 uppercase tracking-widest hover:bg-slate-50">
-               <Download className="w-4 h-4" /> Save PDF
-             </button>
-             <button onClick={() => {}} className="bg-accent-orange text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 uppercase tracking-widest hover:bg-accent-orange-hover" aria-label="Print Invoice">
-               <Printer className="w-4 h-4" /> Print
-             </button>
-         </div>
-       </div>
+       <InvoiceActions waLink={waLink} />
 
        {/* INVOICE A4 WRAPPER */}
        <div className="w-full max-w-[21cm] min-h-[29.7cm] bg-white shadow-xl print:shadow-none border border-slate-200 print:border-none p-12 flex flex-col relative printable-invoice text-slate-800">
@@ -165,16 +152,6 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 
        </div>
 
-       {/* Simple Print Handler Script Injection to wire the buttons */}
-       <script dangerouslySetInnerHTML={{__html: `
-         document.addEventListener('DOMContentLoaded', () => {
-           const btns = document.querySelectorAll('button');
-           btns.forEach(btn => {
-             if(btn.innerHTML.includes('Print')) btn.onclick = () => window.print();
-             if(btn.innerHTML.includes('Save PDF')) btn.onclick = () => window.print();
-           });
-         });
-       `}} />
-    </div>
+     </div>
   );
 }

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { UserPlus, ArrowRight } from "lucide-react";
+import { PressButton } from "@/components/PressButton";
+import { motion } from "framer-motion";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -100,18 +102,21 @@ export default function RegisterPage() {
           </div>
 
           <div className="md:col-span-2 pt-4">
-            <button
+            <PressButton
               type="submit"
               disabled={loading}
               className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-sm font-bold rounded text-white bg-accent-orange hover:bg-accent-orange-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-orange uppercase tracking-widest transition-colors shadow"
             >
               {loading ? "Creating..." : "Register Now"}
               <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </PressButton>
           </div>
           
-          <div className="md:col-span-2 text-center text-sm font-medium text-slate-600 mt-4">
-            Already have an account? <Link href="/login" className="text-slate-900 hover:underline font-bold uppercase tracking-wide">Login</Link>
+          <div className="md:col-span-2 text-center text-sm font-medium text-slate-600 mt-4 flex items-center justify-center gap-2">
+            Already have an account? 
+            <motion.div whileTap={{ scale: 0.95 }}>
+              <Link href="/login" className="text-slate-900 hover:underline font-bold uppercase tracking-wide">Login</Link>
+            </motion.div>
           </div>
         </form>
       </div>

@@ -4,6 +4,8 @@ import { Package, ShieldCheck, CheckCircle2, ChevronRight, HardHat, FileText, Se
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
 import { DeliveryChecker } from "@/components/DeliveryChecker";
+import { ProductReviewManager } from "@/components/ProductReviewManager";
+import { getSession } from "@/lib/auth";
 import { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -27,9 +29,18 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const id = Number(resolvedParams.id);
-  const [product, settings] = await Promise.all([
-     prisma.product.findUnique({ where: { id } }),
-     prisma.storeSettings.findFirst()
+  const [product, settings, session] = await Promise.all([
+     prisma.product.findUnique({ 
+        where: { id },
+        include: {
+           reviews: {
+              include: { user: { select: { fullName: true, companyName: true } } },
+              orderBy: { createdAt: 'desc' }
+           }
+        }
+     }),
+     prisma.storeSettings.findFirst(),
+     getSession()
   ]);
 
   if (!product) return notFound();
@@ -195,6 +206,13 @@ export default async function ProductDetail({ params }: { params: Promise<{ id: 
               </table>
            </div>
         </div>
+        
+        {/* Reviews Section */}
+        <ProductReviewManager 
+           productId={product.id} 
+           initialReviews={product.reviews} 
+           sessionUser={session} 
+        />
       </div>
     </div>
   );

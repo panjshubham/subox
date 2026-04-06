@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { UserCircle2, ArrowRight } from "lucide-react";
+import { PressButton } from "@/components/PressButton";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const [mobile, setMobile] = useState("");
@@ -76,18 +78,21 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <button
+            <PressButton
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 uppercase tracking-widest transition-colors"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 uppercase tracking-widest transition-colors shadow-lg"
             >
               {loading ? "Verifying..." : "Sign In"}
               <ArrowRight className="absolute right-4 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </PressButton>
           </div>
           
-          <div className="text-center text-sm font-medium text-slate-600 mt-4">
-            Don't have an account? <Link href="/register" className="text-accent-orange hover:text-accent-orange-hover font-bold uppercase tracking-wide">Register here</Link>
+          <div className="text-center text-sm font-medium text-slate-600 mt-4 flex items-center justify-center gap-2">
+            Don't have an account? 
+            <motion.div whileTap={{ scale: 0.95 }}>
+              <Link href="/register" className="text-accent-orange hover:text-accent-orange-hover font-bold uppercase tracking-wide">Register here</Link>
+            </motion.div>
           </div>
         </form>
       </div>

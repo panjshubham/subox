@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -18,6 +18,7 @@ model User {
   address      String?
   
   orders       Order[]
+  reviews      Review[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -47,24 +48,40 @@ model Product {
   bulkDiscount Float    @default(5.0) 
   
   orderItems   OrderItem[]
+  reviews      Review[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
-model Order {
+model Review {
   id           Int      @id @default(autoincrement())
+  rating       Int      // 1 to 5
+  comment      String?
+  
+  productId    Int
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   userId       Int
   user         User     @relation(fields: [userId], references: [id])
-  totalAmount  Float
-  status       String   @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED
-  
-  paymentMode  String   @default("BANK_TRANSFER") // BANK_TRANSFER or UPI
-  
-  items        OrderItem[]
   
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+}
+
+model Order {
+  id                 Int      @id @default(autoincrement())
+  userId             Int
+  user               User     @relation(fields: [userId], references: [id])
+  totalAmount        Float
+  status             String   @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED
+  
+  paymentMode        String   @default("BANK_TRANSFER") // BANK_TRANSFER or RAZORPAY
+  razorpayOrderId    String?
+  razorpayPaymentId  String?
+  
+  items              OrderItem[]
+  
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model OrderItem {
@@ -86,7 +103,7 @@ model StoreSettings {
   address      String   @default("41, Tangra Road, Kolkata - 700 015")
   phoneOne     String   @default("+91 9830234950")
   phoneTwo     String   @default("+91 6290754634")
-  email        String   @default("siyarampanjiyara@gmail.com")
+  email        String   @default("93.shubhampanjiyara@gmail.com")
   
   bankName     String   @default("Bandhan Bank")
   bankBranch   String   @default("C I T Road")

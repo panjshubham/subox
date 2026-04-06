@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/CartProvider";
@@ -6,6 +7,8 @@ import { Header } from "@/components/Header";
 import { getSession } from "@/lib/auth";
 import { ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { WhatsAppFloat } from "@/components/WhatsAppFloat";
+import { PageTransition } from "@/components/PageTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,11 +48,25 @@ export default async function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-XXXXXXXXXX');
+          `}
+        </Script>
+      </head>
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-800">
         <CartProvider>
           <Header user={session} phoneOne={settings.phoneOne} phoneTwo={settings.phoneTwo} />
           <main className="flex-grow">
-            {children}
+            <PageTransition>{children}</PageTransition>
           </main>
           <footer className="bg-slate-900 text-slate-400 py-12 text-center text-sm border-t-4 border-accent-orange">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -68,6 +85,7 @@ export default async function RootLayout({
                </div>
             </div>
           </footer>
+          <WhatsAppFloat />
         </CartProvider>
       </body>
     </html>

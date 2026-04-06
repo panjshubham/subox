@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Trash2, Edit2, Plus, Save, X, Lock, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { OrderStatusBadge } from "@/components/OrderStatusBadge";
+import { PressButton } from "@/components/PressButton";
 
 type Product = {
   id: number;
@@ -48,7 +50,8 @@ export default function AdminPage() {
   const [settings, setSettings] = useState<StoreSettings | null>(null);
   const [loading, setLoading] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
-  const [activeTab, setActiveTab] = useState<"CATALOG" | "SETTINGS" | "LOGISTICS">("CATALOG");
+  const [activeTab, setActiveTab] = useState<"CATALOG" | "SETTINGS" | "LOGISTICS" | "ANALYTICS">("CATALOG");
+  const [analytics, setAnalytics] = useState<any>(null);
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<Product>>({});
@@ -89,6 +92,12 @@ export default function AdminPage() {
     }
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    if (isAuthenticated && activeTab === "ANALYTICS" && !analytics) {
+      fetch("/api/admin/analytics").then(r => r.json()).then(setAnalytics);
+    }
+  }, [isAuthenticated, activeTab, analytics]);
+
   const fetchSettings = async () => {
     const res = await fetch("/api/admin/settings");
     const data = await res.json();
@@ -106,6 +115,20 @@ export default function AdminPage() {
     });
     setSavingSettings(false);
     alert("Settings Saved successfully.");
+  };
+
+  const handleUpdateOrderStatus = async (orderId: number, newStatus: string) => {
+     const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+     });
+     if(res.ok) {
+        // Refresh analytics silently
+        fetch("/api/admin/analytics").then(r => r.json()).then(setAnalytics);
+     } else {
+        alert("Failed to update status.");
+     }
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -228,6 +251,12 @@ export default function AdminPage() {
             >
               Logistics
             </button>
+            <button 
+               onClick={() => setActiveTab("ANALYTICS")} 
+               className={`font-bold uppercase tracking-widest text-sm px-4 py-2 ${activeTab === "ANALYTICS" ? "text-accent-orange border-b-2 border-accent-orange" : "text-slate-500 hover:text-slate-800"}`}
+            >
+              Analytics
+            </button>
             <Link href="/" className="flex items-center gap-2 font-bold text-slate-800 hover:text-accent-orange border border-slate-300 px-3 py-1 rounded ml-4 text-xs">
                Store <ExternalLink className="w-3 h-3" />
             </Link>
@@ -258,6 +287,54 @@ export default function AdminPage() {
               if(res.ok) { alert("Bulk updated successfully"); fetchProducts(); } else { alert("Bulk update failed."); }
            }} className="bg-slate-900 text-white font-bold px-6 py-2 rounded uppercase text-xs tracking-widest hover:bg-slate-800">Apply Mass Update</button>
         </div>
+      </div>
+
+      <div className="bg-white p-8 rounded-lg shadow-lg border-t-8 border-slate-900 mb-12">
+        <h2 className="text-xl font-black text-slate-800 uppercase tracking-widest mb-8 flex items-center gap-3">
+          <Plus className="w-6 h-6 text-accent-orange" /> Add New Industrial Asset
+        </h2>
+        <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-4 gap-6">
+           <div className="md:col-span-2 space-y-4">
+              <input type="text" placeholder="Product Name (e.g. 1M G.I. Box)" value={newForm.name || ""} onChange={e => setNewForm({...newForm, name: e.target.value})} className="w-full border-2 p-3 rounded font-bold focus:border-accent-orange outline-none" required />
+              <div className="grid grid-cols-2 gap-4">
+                 <input type="text" placeholder="Category" value={newForm.category || ""} onChange={e => setNewForm({...newForm, category: e.target.value})} className="border-2 p-2 rounded text-sm" />
+                 <input type="text" placeholder="Module Size" value={newForm.moduleSize || ""} onChange={e => setNewForm({...newForm, moduleSize: e.target.value})} className="border-2 p-2 rounded text-sm" />
+              </div>
+           </div>
+
+           <div className="space-y-4">
+              <input type="number" placeholder="MRP (₹)" value={newForm.mrp || ""} onChange={e => setNewForm({...newForm, mrp: Number(e.target.value)})} className="w-full border-2 p-3 rounded font-bold text-slate-400 line-through" required />
+              <input type="number" placeholder="Sale Price (₹)" value={newForm.price || ""} onChange={e => setNewForm({...newForm, price: Number(e.target.value)})} className="w-full border-2 p-3 rounded font-black text-accent-orange text-xl" required />
+           </div>
+
+           <div className="space-y-4">
+              <div className="border-2 border-dashed border-slate-300 p-4 rounded-xl text-center relative hover:bg-slate-50 transition-colors group h-full flex flex-col items-center justify-center min-h-[120px]">
+                 {uploadingImage ? (
+                    <div className="flex flex-col items-center gap-2">
+                       <div className="w-6 h-6 border-4 border-accent-orange border-t-transparent rounded-full animate-spin"></div>
+                       <span className="text-[10px] font-black uppercase text-slate-400">Uploading...</span>
+                    </div>
+                 ) : newForm.imageUrl ? (
+                    <div className="relative w-full h-full flex items-center justify-center">
+                       <img src={newForm.imageUrl} alt="Preview" className="max-h-20 object-contain rounded" />
+                       <button type="button" onClick={() => setNewForm({...newForm, imageUrl: ""})} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3"/></button>
+                    </div>
+                 ) : (
+                    <>
+                       <Plus className="w-8 h-8 text-slate-300 mb-2 group-hover:text-accent-orange transition-colors" />
+                       <span className="text-[10px] font-black uppercase text-slate-400">Add Product Image</span>
+                       <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, true)} className="absolute inset-0 opacity-0 cursor-pointer" />
+                    </>
+                 )}
+              </div>
+           </div>
+
+           <div className="md:col-span-4 flex justify-end">
+              <button type="submit" className="bg-slate-900 text-white px-12 py-4 rounded font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl active:scale-95">
+                 Initialize Product in Catalog
+              </button>
+           </div>
+        </form>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm overflow-x-auto border border-slate-200">
@@ -292,14 +369,18 @@ export default function AdminPage() {
                       <input type="text" value={editForm.features || ""} onChange={(e) => setEditForm({...editForm, features: e.target.value})} className="w-full border p-1 rounded text-xs" placeholder="Features" />
                       <textarea value={editForm.description || ""} onChange={(e) => setEditForm({...editForm, description: e.target.value})} className="w-full border p-1 rounded text-xs h-16" placeholder="SEO Description" />
                       
-                      <div className="border border-dashed border-slate-300 p-2 rounded text-center relative">
-                         {uploadingImage ? <span className="text-xs font-bold text-slate-500">Uploading...</span> : (
+                      <div className="border border-dashed border-slate-300 p-2 rounded text-center relative group min-h-[60px] flex flex-col items-center justify-center">
+                         {uploadingImage ? <span className="text-[10px] font-black uppercase text-slate-400 animate-pulse">Uploading...</span> : editForm.imageUrl ? (
+                            <div className="relative">
+                               <img src={editForm.imageUrl} alt="Edit Preview" className="h-12 object-contain" />
+                               <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e)} className="absolute inset-0 opacity-0 cursor-pointer" />
+                            </div>
+                         ) : (
                             <>
-                               <span className="text-xs font-bold text-slate-500 cursor-pointer block">{editForm.imageUrl ? "Change Image" : "Attach Image (.jpg/.png)"}</span>
+                               <span className="text-[10px] font-black uppercase text-slate-400 cursor-pointer block">Attach Image</span>
                                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e)} className="absolute inset-0 opacity-0 cursor-pointer" />
                             </>
                          )}
-                         {editForm.imageUrl && <p className="text-[10px] text-green-600 mt-1 truncate">{editForm.imageUrl}</p>}
                       </div>
                     </td>
                     <td className="p-4 space-y-2 align-top">
@@ -467,10 +548,84 @@ export default function AdminPage() {
                </div>
             </div>
             
-            <button type="submit" disabled={upsertingPins || pinsText.length < 6} className="bg-accent-orange hover:bg-accent-orange-hover text-white px-8 py-3 rounded uppercase tracking-widest text-sm font-bold w-full disabled:opacity-50 transition-colors">
+            <PressButton type="submit" disabled={upsertingPins || pinsText.length < 6} className="bg-accent-orange hover:bg-accent-orange-hover text-white px-8 py-3 rounded uppercase tracking-widest text-sm font-bold w-full disabled:opacity-50 transition-colors">
                {upsertingPins ? "Routing Network..." : "Mass Update Pincodes"}
-            </button>
+            </PressButton>
          </form>
+      </div>
+      ) : activeTab === "ANALYTICS" ? (
+      <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-200 max-w-5xl">
+         <h2 className="text-xl font-black text-slate-800 uppercase tracking-widest mb-6 border-b-4 border-slate-900 inline-block pb-2">Business Analytics</h2>
+         
+         {!analytics ? (
+            <div className="text-slate-500 font-bold animate-pulse">Running revenue models...</div>
+         ) : (
+            <div className="space-y-8">
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-slate-900 p-6 rounded-lg shadow-lg text-white">
+                     <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mb-2">Total Gross Revenue</p>
+                     <p className="text-4xl font-black text-accent-orange">₹{analytics.grossRevenue.toFixed(2)}</p>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 p-6 rounded-lg">
+                     <p className="text-slate-500 font-bold uppercase tracking-widest text-xs mb-2">Total Orders</p>
+                     <p className="text-4xl font-black text-slate-800">{analytics.totalOrders}</p>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 p-6 rounded-lg">
+                     <p className="text-slate-500 font-bold uppercase tracking-widest text-xs mb-2">Market Stock Value</p>
+                     <p className="text-4xl font-black text-slate-800">₹{analytics.stockValue.toFixed(2)}</p>
+                  </div>
+               </div>
+
+               <div>
+                  <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Recent B2B Orders</h3>
+                  <div className="overflow-x-auto border border-slate-200 rounded-lg">
+                     <table className="w-full text-left bg-white text-sm">
+                        <thead className="bg-slate-100 text-slate-700 uppercase tracking-wider text-xs">
+                           <tr>
+                              <th className="p-4 font-bold border-b border-slate-200">ID</th>
+                              <th className="p-4 font-bold border-b border-slate-200">Date</th>
+                              <th className="p-4 font-bold border-b border-slate-200">Customer</th>
+                              <th className="p-4 font-bold border-b border-slate-200">Total (INC TAX)</th>
+                              <th className="p-4 font-bold border-b border-slate-200">Status</th>
+                           </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                           {analytics.recentOrders.map((o: any) => (
+                              <tr key={o.id} className="hover:bg-slate-50">
+                                 <td className="p-4 font-black">#INV-{o.id.toString().padStart(6,'0')}</td>
+                                 <td className="p-4 text-slate-600">{new Date(o.date).toLocaleDateString('en-IN')}</td>
+                                 <td className="p-4 uppercase tracking-wider font-bold text-slate-700">{o.customer || 'Guest User'}</td>
+                                 <td className="p-4 font-black text-accent-orange text-base">₹{o.total.toFixed(2)}</td>
+                                 <td className="p-4">
+                                    <div className="flex flex-col gap-2">
+                                       {/* Live pulse badge showing current status */}
+                                       <OrderStatusBadge status={o.status} />
+                                       {/* Dropdown to change status */}
+                                       <select 
+                                          value={o.status}
+                                          onChange={(e) => handleUpdateOrderStatus(o.id, e.target.value)}
+                                          className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide border border-slate-200 focus:ring-2 focus:ring-accent-orange outline-none bg-white text-slate-700"
+                                       >
+                                          <option value="PENDING">PENDING</option>
+                                          <option value="PROCESSING">PROCESSING</option>
+                                          <option value="SHIPPED">SHIPPED</option>
+                                          <option value="DELIVERED">DELIVERED</option>
+                                       </select>
+                                    </div>
+                                 </td>
+                              </tr>
+                           ))}
+                           {analytics.recentOrders.length === 0 && (
+                              <tr>
+                                 <td colSpan={5} className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest">No recent orders.</td>
+                              </tr>
+                           )}
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+            </div>
+         )}
       </div>
       ) : null}
     </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
 
 export function BannerSlider({ banners }: { banners: any[] }) {
@@ -58,9 +59,18 @@ export function BannerSlider({ banners }: { banners: any[] }) {
                       <span className="text-2xl text-slate-400 line-through font-bold">₹{p.mrp.toFixed(2)}</span>
                    </div>
 
-                   <Link href={`/product/${p.id}`} className="inline-block bg-accent-orange hover:bg-orange-600 text-white font-black text-lg px-12 py-4 rounded shadow-xl transition-all hover:-translate-y-1 uppercase tracking-widest">
-                     Shop Now
-                   </Link>
+                   <div className="flex gap-4">
+                     <motion.div whileTap={{ scale: 0.97 }} transition={{ duration: 0.1 }}>
+                       <Link href={`/product/${p.id}`} className="inline-block bg-accent-orange hover:bg-orange-600 text-white font-black text-sm px-8 py-4 rounded-none shadow-xl transition-all hover:-translate-y-1 uppercase tracking-widest text-center">
+                         Shop Now
+                       </Link>
+                     </motion.div>
+                     <motion.div whileTap={{ scale: 0.97 }} transition={{ duration: 0.1 }}>
+                       <Link href="/contact" className="inline-block bg-transparent border-2 border-slate-400 text-slate-300 hover:border-white hover:text-white font-black text-sm px-8 py-4 rounded-none transition-all hover:-translate-y-1 uppercase tracking-widest text-center">
+                         View Catalogue
+                       </Link>
+                     </motion.div>
+                   </div>
                 </div>
                 
                 <div className="flex-1 hidden md:flex justify-end relative">
@@ -81,24 +91,27 @@ export function BannerSlider({ banners }: { banners: any[] }) {
       {/* Navigation Arrows */}
       {banners.length > 1 && (
         <>
-          <button 
+         <motion.button 
+            whileTap={{ scale: 0.9 }}
             onClick={() => setCurrent(prev => prev === 0 ? banners.length - 1 : prev - 1)}
             className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-black/40 hover:bg-black/60 text-white p-3 rounded-full backdrop-blur transition-all border border-white/10"
           >
              <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button 
+          </motion.button>
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
             onClick={() => setCurrent(prev => prev === banners.length - 1 ? 0 : prev + 1)}
             className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-black/40 hover:bg-black/60 text-white p-3 rounded-full backdrop-blur transition-all border border-white/10"
           >
              <ChevronRight className="w-6 h-6" />
-          </button>
+          </motion.button>
           
           {/* Dots */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
             {banners.map((_, i) => (
-               <button 
+               <motion.button 
                  key={i} 
+                 whileTap={{ scale: 0.8 }}
                  onClick={() => setCurrent(i)}
                  className={`w-3 h-3 rounded-full transition-all border border-white/20 ${i === current ? 'bg-accent-orange w-8' : 'bg-white/50 hover:bg-white'}`}
                />

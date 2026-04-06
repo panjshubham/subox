@@ -1,6 +1,8 @@
 import { ShieldCheck, Target, Factory, Cog, Truck, Award } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { FactoryGallery } from "@/components/FactoryGallery";
+import { AboutCTAs } from "@/components/AboutCTAs";
 
 export const metadata = {
   title: "Factory Profile | ShuBox Industrial Manufacturing",
@@ -45,15 +47,27 @@ export default async function AboutPage() {
                   <p className="text-slate-600 mt-2"><span className="font-bold">GSTIN:</span> {settings?.gstin}</p>
                </div>
             </div>
-            <div className="relative h-96 bg-slate-200 rounded-lg overflow-hidden shadow-inner flex items-center justify-center border border-slate-300">
-               {/* Factory Placeholder */}
-               <div className="absolute inset-0 pattern-dots pattern-slate-300 pattern-bg-white pattern-size-4 pattern-opacity-100" />
-               <Factory className="w-32 h-32 text-slate-400 relative z-10" />
-               <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded font-bold text-slate-800 tracking-widest text-sm shadow-lg border border-slate-200">
-                 KOLKATA FACILITY
+            <div className="relative h-96 bg-slate-900 rounded-lg overflow-hidden shadow-inner border border-slate-800 group">
+               <iframe 
+                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3684.6666912341075!2d88.38486927481081!3d22.554155233647034!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a02768e7141be81%3A0x8e20cd80186f856c!2s41%2C%20New%20Tangra%20Rd%2C%20Tangra%2C%20Kolkata%2C%20West%20Bengal%20700046!5e0!3m2!1sen!2sin!4v1775398030945!5m2!2sen!2sin" 
+                 width="100%" 
+                 height="100%" 
+                 style={{border:0, filter: 'grayscale(1) contrast(1.2) opacity(0.7)'}} 
+                 allowFullScreen 
+                 loading="lazy" 
+                 referrerPolicy="no-referrer-when-downgrade"
+                 className="absolute inset-0 transition-all duration-700 group-hover:opacity-100 group-hover:filter-none"
+               ></iframe>
+               <div className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur text-white px-4 py-2 rounded-none font-black tracking-widest text-[10px] uppercase border-l-4 border-accent-orange z-20">
+                 Precision Manufacturing Hub
+               </div>
+               <div className="absolute bottom-4 right-4 bg-accent-orange text-white px-4 py-2 rounded-none font-black tracking-widest text-[10px] uppercase shadow-2xl z-20">
+                 41, TANGRA ROAD, KOLKATA
                </div>
             </div>
          </div>
+
+         <FactoryGallery />
 
          <div className="mb-24">
             <h2 className="text-3xl font-black text-slate-800 uppercase tracking-widest mb-12 text-center">The ShuBox Advantage</h2>
@@ -86,14 +100,7 @@ export default async function AboutPage() {
             <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-10 relative z-10 font-medium">
                Set up your business account today to view wholesale pricing, manage invoices natively, and track bulk logistics directly from your dashboard.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-               <Link href="/register" className="bg-accent-orange hover:bg-orange-600 font-bold uppercase tracking-widest text-sm px-8 py-4 rounded transition-colors shadow-lg">
-                 Create Business Account
-               </Link>
-               <Link href="/" className="bg-white/10 hover:bg-white/20 font-bold uppercase tracking-widest text-sm px-8 py-4 rounded transition-colors backdrop-blur">
-                 View Catalog
-               </Link>
-            </div>
+            <AboutCTAs />
          </div>
 
       </div>
