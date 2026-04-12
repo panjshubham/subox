@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSession } from '@/lib/auth';
 
-// Fetch all rules
+// Fetch all rules — public, used by DeliveryChecker component
 export async function GET() {
   const list = await prisma.serviceablePincode.findMany({
     orderBy: { state: 'asc' }
@@ -9,8 +10,13 @@ export async function GET() {
   return NextResponse.json(list);
 }
 
-// Mass-upsert rules
+// Mass-upsert rules — admin only
 export async function POST(request: Request) {
+  const session = await getSession();
+  if (!session || session.mobile !== '9830234950') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { pins, city, state } = await request.json();
     
@@ -33,8 +39,13 @@ export async function POST(request: Request) {
   }
 }
 
-// Mass delete or single delete
+// Mass delete or single delete — admin only
 export async function DELETE(request: Request) {
+  const session = await getSession();
+  if (!session || session.mobile !== '9830234950') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');

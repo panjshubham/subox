@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Ensure Prisma works correctly in serverless (Vercel) environments
+  serverExternalPackages: ["@prisma/client", "bcryptjs"],
 };
 
 export default nextConfig;
+

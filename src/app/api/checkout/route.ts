@@ -24,20 +24,20 @@ export async function POST(request: Request) {
           }))
         }
       },
-      include: { user: true }
+      include: { user: true, items: true }
     });
 
-    const emailHtml = `
-      <div style="font-family: sans-serif; padding: 20px;">
-        <h2 style="color: #f97316;">Order Confirmed!</h2>
-        <p>Thank you for choosing ShuBox. Your order #INV-${order.id.toString().padStart(6,'0')} has been received and is currently PENDING.</p>
-        <p>Please check your dashboard for updates regarding tracking and bank transfer execution.</p>
-      </div>
-    `;
-    const { sendEmail } = await import('@/lib/email');
+    // Send branded confirmation email to the customer
+    const { sendOrderConfirmationEmail, sendAdminNewOrderEmail } = await import('@/lib/email');
     if (order.user?.email) {
-       await sendEmail(order.user.email, `Order #INV-${order.id.toString().padStart(6,'0')} Confirmed`, emailHtml);
+      sendOrderConfirmationEmail(order, order.user).catch(e =>
+        console.error('Customer confirmation email error:', e)
+      );
     }
+    // Always notify admin of the new order
+    sendAdminNewOrderEmail(order, order.user).catch(e =>
+      console.error('Admin notification email error:', e)
+    );
 
     return NextResponse.json({ success: true, orderId: order.id });
   } catch (error) {

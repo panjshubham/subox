@@ -33,7 +33,7 @@ const STATS: Stat[] = [
   },
   {
     icon: <ReceiptText className="w-8 h-8 text-accent-orange mb-3" />,
-    value: 18,
+    value: 100,
     suffix: "%",
     label: "GST Billing",
     sublabel: "Compliant Invoicing",
@@ -41,7 +41,7 @@ const STATS: Stat[] = [
   },
   {
     icon: <Truck className="w-8 h-8 text-accent-orange mb-3" />,
-    value: 7,
+    value: 3,
     prefix: "< ",
     suffix: " Days",
     label: "Ships Fast",

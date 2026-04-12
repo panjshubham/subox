@@ -9,6 +9,7 @@ import { ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { PageTransition } from "@/components/PageTransition";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -89,6 +90,13 @@ export default async function RootLayout({
             </div>
           </footer>
           <WhatsAppFloat />
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: { fontSize: "13px", fontWeight: "bold", borderRadius: "8px" },
+              success: { iconTheme: { primary: "#f97316", secondary: "white" } },
+            }}
+          />
         </CartProvider>
       </body>
     </html>

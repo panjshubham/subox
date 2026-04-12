@@ -2,7 +2,11 @@ import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-export const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "super-secure-shubox-secret-key-that-is-long");
+export const JWT_SECRET = new TextEncoder().encode(
+  process.env.NEXTAUTH_SECRET ||
+  process.env.JWT_SECRET ||
+  "super-secure-shubox-secret-key-that-is-long"
+);
 
 // Payload types
 export interface UserJwtPayload {

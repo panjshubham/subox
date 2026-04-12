@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Package, ShieldCheck, CheckCircle2, ShoppingCart, Star } from "lucide-react";
 import { useCart } from "./CartProvider";
+import toast from "react-hot-toast";
 
 type ProductCardProps = {
   product: {
@@ -27,9 +28,8 @@ export function ProductCard({ product }: ProductCardProps) {
   const [isImageLoading, setIsImageLoading] = useState(true);
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
     if (!product.inStock) return;
-    
     addItem({
       id: `${product.id}-${Date.now()}`,
       sizeId: product.id,
@@ -38,7 +38,10 @@ export function ProductCard({ product }: ProductCardProps) {
       quantity: 1,
       bulkDiscount: product.bulkDiscount
     });
-    alert(`Added ${product.name} to cart!`);
+    toast.success(`${product.name} added to cart!`, {
+      icon: "🛒",
+      style: { fontWeight: "bold", fontSize: "13px" },
+    });
   };
 
   const discountPercent = Math.round(((product.mrp - product.price) / product.mrp) * 100);

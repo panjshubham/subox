@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSession } from '@/lib/auth';
 
 export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+  // Admin-only route
+  const session = await getSession();
+  if (!session || session.mobile !== '9830234950') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const params = await props.params;
     const id = Number(params.id);
@@ -10,6 +17,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
       where: { id },
       data: {
         name: json.name,
+        category: json.category,
         moduleSize: json.moduleSize,
         material: json.material,
         primaryUse: json.primaryUse,
@@ -22,6 +30,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
         hsnCode: json.hsnCode,
         description: json.description,
         inStock: json.inStock,
+        showInBanner: json.showInBanner, // ← was missing — banner toggle never saved
         bulkDiscount: Number(json.bulkDiscount),
         imageUrl: json.imageUrl,
       }
@@ -33,6 +42,12 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
 }
 
 export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
+  // Admin-only route
+  const session = await getSession();
+  if (!session || session.mobile !== '9830234950') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const params = await props.params;
     const id = Number(params.id);

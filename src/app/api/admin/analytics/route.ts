@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSession } from '@/lib/auth';
 
 export async function GET() {
+  // Admin-only route
+  const session = await getSession();
+  if (!session || session.mobile !== '9830234950') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const orders = await prisma.order.findMany({
       include: { items: true, user: true },
@@ -10,19 +17,15 @@ export async function GET() {
 
     const products = await prisma.product.findMany();
 
-    // Gross Revenue (all orders combined)
-    const grossRevenue = orders.reduce((acc, order) => {
-       const cgst = order.totalAmount * 0.09;
-       const sgst = order.totalAmount * 0.09;
-       return acc + order.totalAmount + cgst + sgst;
-    }, 0);
+    // Gross Revenue — totalAmount stored in DB already includes GST at time of order,
+    // so we use it directly without multiplying again.
+    const grossRevenue = orders.reduce((acc, order) => acc + order.totalAmount, 0);
 
-    // Total Stock Market Value
+    // Total Stock Market Value (estimated at 100 units average per in-stock product)
     let stockValue = 0;
     products.forEach(p => {
-       if(p.inStock) {
-          // Assume 100 units average stock if not tracked explicitly in the DB
-          stockValue += p.price * 100; 
+       if (p.inStock) {
+          stockValue += p.price * 100;
        }
     });
 
@@ -30,7 +33,7 @@ export async function GET() {
        id: o.id,
        date: o.createdAt,
        customer: o.user.companyName || o.user.fullName,
-       total: o.totalAmount + (o.totalAmount * 0.18),
+       total: o.totalAmount,
        status: o.status
     }));
 

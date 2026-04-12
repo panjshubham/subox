@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
+import { getSession } from '@/lib/auth';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,6 +9,12 @@ cloudinary.config({
 });
 
 export async function POST(request: Request) {
+  // Admin-only route
+  const session = await getSession();
+  if (!session || session.mobile !== '9830234950') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const data = await request.formData();
     const file: File | null = data.get('file') as unknown as File;
