@@ -200,6 +200,7 @@ export default function AdminPage() {
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isNew = false, productId?: number) => {
+    console.log("1. Upload started");
     if (!e.target.files?.[0]) return;
     setUploadingImage(true);
     const formData = new FormData();
@@ -207,19 +208,24 @@ export default function AdminPage() {
     const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
     
     if (res.ok) {
-      const { url } = await res.json();
-      console.log("Cloudinary URL:", url);
+      const data = await res.json();
+      console.log("2. Cloudinary response:", data);
+      const url = data.url;
+      console.log("3. imageUrl to save:", url);
+
       if (isNew) {
         setNewForm(f => ({ ...f, imageUrl: url }));
       } else {
         setEditForm(f => ({ ...f, imageUrl: url }));
         // If we have a product ID, immediately save it to DB
         if (productId) {
-          await fetch(`/api/admin/products/${productId}`, {
+          const patchRes = await fetch(`/api/admin/products/${productId}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ imageUrl: url })
           });
+          const patchResult = await patchRes.json();
+          console.log("4. PATCH response:", patchResult);
           fetchProducts();
         }
       }

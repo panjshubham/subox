@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     const count = await prisma.product.count();
-    const products = await prisma.product.findMany({ select: { id: true, name: true, price: true } });
+    const products = await prisma.product.findMany({ select: { id: true, name: true, price: true, imageUrl: true } });
     const settings = await prisma.storeSettings.findFirst({ select: { id: true, email: true } });
 
     return NextResponse.json({
