@@ -70,8 +70,10 @@ export function ProductCard({ product }: ProductCardProps) {
             </>
           ) : (
             <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center text-center rounded border border-slate-200 border-dashed group-hover:scale-105 transition-transform duration-300">
-               <Package className="w-16 h-16 text-slate-300 mb-2 drop-shadow-sm" />
-               <span className="font-black text-slate-300 uppercase tracking-widest text-[10px]">Industrial<br/>Enclosure</span>
+               <div className="w-16 h-16 bg-accent-orange text-white rounded flex items-center justify-center font-black text-3xl tracking-wider shadow-sm mb-3">
+                 SB
+               </div>
+               <span className="font-black text-slate-400 uppercase tracking-widest text-[10px]">Industrial<br/>Enclosure</span>
             </div>
           )}
         </div>
