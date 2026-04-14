@@ -41,6 +41,29 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
   }
 }
 
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
+  // Admin-only route
+  const session = await getSession();
+  if (!session || session.mobile !== '9830234950') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const params = await props.params;
+    const id = Number(params.id);
+    const json = await request.json();
+    
+    // Allows partial updates (e.g., just updating the imageUrl)
+    const updated = await prisma.product.update({
+      where: { id },
+      data: json
+    });
+    return NextResponse.json(updated);
+  } catch (error) {
+    return NextResponse.json({ error: 'Error partially updating product' }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
   // Admin-only route
   const session = await getSession();

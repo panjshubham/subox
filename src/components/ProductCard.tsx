@@ -57,7 +57,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <Link href={`/product/${product.id}`} className="flex flex-col flex-1">
         <div className="bg-slate-50 w-full aspect-square flex items-center justify-center p-8 group-hover:bg-slate-100 transition-colors border-b border-slate-100 relative overflow-hidden shrink-0">
-          {product.imageUrl ? (
+          {product.imageUrl && product.imageUrl.startsWith("http") ? (
             <>
                <div className={`absolute inset-0 bg-slate-200 animate-pulse z-0 ${!isImageLoading && 'hidden'}`} />
                <Image 

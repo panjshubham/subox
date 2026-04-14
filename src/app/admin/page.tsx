@@ -199,16 +199,29 @@ export default function AdminPage() {
     if (res.ok) { setEditingId(null); fetchProducts(); }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isNew = false) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isNew = false, productId?: number) => {
     if (!e.target.files?.[0]) return;
     setUploadingImage(true);
     const formData = new FormData();
     formData.append("file", e.target.files[0]);
     const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+    
     if (res.ok) {
       const { url } = await res.json();
-      if (isNew) setNewForm(f => ({ ...f, imageUrl: url }));
-      else setEditForm(f => ({ ...f, imageUrl: url }));
+      if (isNew) {
+        setNewForm(f => ({ ...f, imageUrl: url }));
+      } else {
+        setEditForm(f => ({ ...f, imageUrl: url }));
+        // If we have a product ID, immediately save it to DB
+        if (productId) {
+          await fetch(`/api/admin/products/${productId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ imageUrl: url })
+          });
+          fetchProducts();
+        }
+      }
     }
     setUploadingImage(false);
   };
@@ -530,7 +543,7 @@ export default function AdminPage() {
                               {uploadingImage ? <span className="text-[10px] animate-pulse text-slate-400">Uploading...</span>
                                 : editForm.imageUrl ? <img src={editForm.imageUrl} alt="Edit" className="h-10 object-contain" />
                                 : <span className="text-[10px] text-slate-400">Upload image</span>}
-                              <input type="file" accept="image/*" onChange={e => handleImageUpload(e)} className="absolute inset-0 opacity-0 cursor-pointer" />
+                              <input type="file" accept="image/*" onChange={e => handleImageUpload(e, false, p.id)} className="absolute inset-0 opacity-0 cursor-pointer" />
                             </div>
                           </td>
                           <td className="p-4 space-y-2 align-top">
