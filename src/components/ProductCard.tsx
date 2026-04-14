@@ -58,22 +58,14 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={`/product/${product.id}`} className="flex flex-col flex-1">
         <div className="bg-slate-50 w-full aspect-square flex items-center justify-center p-8 group-hover:bg-slate-100 transition-colors border-b border-slate-100 relative overflow-hidden shrink-0">
           {product.imageUrl && product.imageUrl.startsWith("http") ? (
-            <>
-               <div className={`absolute inset-0 bg-slate-200 animate-pulse z-0 ${!isImageLoading && 'hidden'}`} />
-               <Image 
-                 src={product.imageUrl} 
-                 alt={product.name} 
-                 fill
-                 onLoad={() => setIsImageLoading(false)}
-                 className={`object-cover group-hover:scale-105 transition-all duration-500 rounded mix-blend-multiply z-10 ${isImageLoading ? 'opacity-0' : 'opacity-100'}`} 
-               />
-            </>
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
           ) : (
-            <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center text-center rounded border border-slate-200 border-dashed group-hover:scale-105 transition-transform duration-300">
-               <div className="w-16 h-16 bg-accent-orange text-white rounded flex items-center justify-center font-black text-3xl tracking-wider shadow-sm mb-3">
-                 SB
-               </div>
-               <span className="font-black text-slate-400 uppercase tracking-widest text-[10px]">Industrial<br/>Enclosure</span>
+            <div className="w-full h-full flex items-center justify-center bg-slate-100 rounded border border-slate-200 border-dashed group-hover:scale-105 transition-transform duration-300">
+              <span className="text-3xl font-bold text-accent-orange">SB</span>
             </div>
           )}
         </div>

@@ -208,6 +208,7 @@ export default function AdminPage() {
     
     if (res.ok) {
       const { url } = await res.json();
+      console.log("Cloudinary URL:", url);
       if (isNew) {
         setNewForm(f => ({ ...f, imageUrl: url }));
       } else {
