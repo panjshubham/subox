@@ -41,7 +41,7 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Industrial Email Sent: %s', info.messageId);
+    void info; // suppress unused variable warning
     return { success: true };
   } catch (error) {
     console.error('SMTP Transmission Error:', error);

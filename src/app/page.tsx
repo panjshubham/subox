@@ -15,8 +15,6 @@ export default async function Home() {
     orderBy: { price: 'asc' }
   });
 
-  console.log("HOMEPAGE FETCHED PRODUCTS:", products.length);
-
   const bannerProducts = products.filter((p: any) => p.showInBanner);
 
   return (

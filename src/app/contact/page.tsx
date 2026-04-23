@@ -1,11 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import { Phone, Mail, MapPin, Building2, MessageCircle } from "lucide-react";
 import { ContactForm } from "@/components/ContactForm";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact Us | ShuBox Industrial",
+  description: "Get in touch with Shubham Enterprise for industrial electrical box procurement, bulk orders, and B2B rates. Call or WhatsApp from Kolkata.",
+};
 
 export default async function ContactPage() {
   const settings = await prisma.storeSettings.findUnique({ where: { id: 1 } });
   
   if (!settings) return null;
+
 
   return (
     <div className="bg-slate-50 min-h-screen py-16 px-4 sm:px-6 lg:px-8">
